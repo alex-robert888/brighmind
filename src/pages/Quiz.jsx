@@ -16,6 +16,8 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { cn } from "../lib/utils"
+import Sidebar from "../components/Sidebar"
+import Header from "../components/Header"
 
 // Quiz data
 const quizData = {
@@ -619,10 +621,15 @@ export default function QuizInterface() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header with titles aligned with buttons */}
-      <header className="p-4 border-b">
-        <div className="flex flex-col space-y-2">
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Replace the custom header with the shared Header */}
+        <Header title={quizData.title} showSearch={false} />
+
+        {/* Quiz-specific subheader */}
+        <div className="bg-white p-3 border-b">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <button
@@ -632,166 +639,161 @@ export default function QuizInterface() {
                 <ArrowLeft size={16} />
                 Back to Dashboard
               </button>
-              <h1 className="text-xl font-bold">{quizData.title}</h1>
+              <h2 className="text-lg font-semibold">{quizData.chapter}</h2>
             </div>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <button
-                className="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
-                onClick={navigateToCourse}
-              >
-                Back to Course
-              </button>
-              <h2 className="text-lg font-semibold ml-11">{quizData.chapter}</h2>
-            </div>
+            <button
+              className="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+              onClick={navigateToCourse}
+            >
+              Back to Course
+            </button>
           </div>
         </div>
-      </header>
 
-      {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Question navigation sidebar - hide in review mode */}
-        {!reviewMode && (
-          <div className="w-48 border-r bg-gray-50 flex flex-col">
-            <div className="p-3 flex items-center gap-2 border-b">
-              <Clock size={16} className="text-gray-600" />
-              <span className="font-mono">{formatTime(timeLeft)}</span>
-            </div>
-            <div className="flex flex-col p-2 gap-2 overflow-y-auto">
-              {quizData.questions.map((question) => {
-                const status = getQuestionStatus(question.id)
-                return (
-                  <button
-                    key={question.id}
-                    className={cn("py-2 text-center rounded-md border transition-colors", getStatusColor(status))}
-                    onClick={() => navigateToQuestion(question.id)}
-                    disabled={quizCompleted}
-                  >
-                    Question {question.id}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Question content, completion screen, or review mode */}
-        {quizCompleted ? (
-          reviewMode ? (
-            renderReviewMode()
-          ) : (
-            renderQuizCompletion()
-          )
-        ) : (
-          <div className="flex-1 flex flex-col bg-blue-50">
-            <div className="p-6 flex-1">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium">
-                  Question {currentQuestionId} / {quizData.totalQuestions}
-                </h3>
-                <button
-                  className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
-                  onClick={toggleHint}
-                >
-                  <span>Hint</span>
-                  <HelpCircle size={16} />
-                </button>
+        {/* Main content */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Question navigation sidebar - hide in review mode */}
+          {!reviewMode && (
+            <div className="w-48 border-r bg-gray-50 flex flex-col">
+              <div className="p-3 flex items-center gap-2 border-b">
+                <Clock size={16} className="text-gray-600" />
+                <span className="font-mono">{formatTime(timeLeft)}</span>
               </div>
+              <div className="flex flex-col p-2 gap-2 overflow-y-auto">
+                {quizData.questions.map((question) => {
+                  const status = getQuestionStatus(question.id)
+                  return (
+                    <button
+                      key={question.id}
+                      className={cn("py-2 text-center rounded-md border transition-colors", getStatusColor(status))}
+                      onClick={() => navigateToQuestion(question.id)}
+                      disabled={quizCompleted}
+                    >
+                      Question {question.id}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-lg mb-6">{currentQuestion.text}</p>
+          {/* Question content, completion screen, or review mode */}
+          {quizCompleted ? (
+            reviewMode ? (
+              renderReviewMode()
+            ) : (
+              renderQuizCompletion()
+            )
+          ) : (
+            <div className="flex-1 flex flex-col bg-blue-50">
+              <div className="p-6 flex-1">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium">
+                    Question {currentQuestionId} / {quizData.totalQuestions}
+                  </h3>
+                  <button
+                    className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+                    onClick={toggleHint}
+                  >
+                    <span>Hint</span>
+                    <HelpCircle size={16} />
+                  </button>
+                </div>
 
-                {/* Hint section */}
-                {showHint && (
-                  <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
-                    <p className="flex items-start gap-2">
-                      <HelpCircle size={18} className="mt-0.5 flex-shrink-0" />
-                      <span>{currentQuestion.hint}</span>
-                    </p>
-                  </div>
-                )}
+                <div className="bg-white rounded-lg p-6 shadow-sm">
+                  <p className="text-lg mb-6">{currentQuestion.text}</p>
 
-                <div className="space-y-3">
-                  {currentQuestion.options.map((option) => {
-                    const isSelected = selectedAnswers[currentQuestionId] === option.id
-                    const isSubmitted = isCurrentQuestionAnswered
-                    const isCorrect = option.id === currentQuestion.correctAnswer
+                  {/* Hint section */}
+                  {showHint && (
+                    <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
+                      <p className="flex items-start gap-2">
+                        <HelpCircle size={18} className="mt-0.5 flex-shrink-0" />
+                        <span>{currentQuestion.hint}</span>
+                      </p>
+                    </div>
+                  )}
 
-                    let optionClass = "w-full text-left px-4 py-3 rounded-full border transition-colors"
+                  <div className="space-y-3">
+                    {currentQuestion.options.map((option) => {
+                      const isSelected = selectedAnswers[currentQuestionId] === option.id
+                      const isSubmitted = isCurrentQuestionAnswered
+                      const isCorrect = option.id === currentQuestion.correctAnswer
 
-                    if (isSubmitted) {
-                      // If answer is submitted, show correct/incorrect styling
-                      if (isCorrect) {
-                        optionClass += " border-green-500 bg-green-50 text-green-800"
-                      } else if (isSelected) {
-                        optionClass += " border-red-500 bg-red-50 text-red-800"
+                      let optionClass = "w-full text-left px-4 py-3 rounded-full border transition-colors"
+
+                      if (isSubmitted) {
+                        // If answer is submitted, show correct/incorrect styling
+                        if (isCorrect) {
+                          optionClass += " border-green-500 bg-green-50 text-green-800"
+                        } else if (isSelected) {
+                          optionClass += " border-red-500 bg-red-50 text-red-800"
+                        } else {
+                          optionClass += " border-gray-300 opacity-70"
+                        }
                       } else {
-                        optionClass += " border-gray-300 opacity-70"
+                        // If not submitted yet, just highlight selection
+                        optionClass += isSelected
+                          ? " border-blue-500 bg-blue-50"
+                          : " border-gray-300 hover:border-blue-300"
                       }
-                    } else {
-                      // If not submitted yet, just highlight selection
-                      optionClass += isSelected
-                        ? " border-blue-500 bg-blue-50"
-                        : " border-gray-300 hover:border-blue-300"
-                    }
 
-                    return (
-                      <button
-                        key={option.id}
-                        className={optionClass}
-                        onClick={() => handleOptionSelect(option.id)}
-                        disabled={isSubmitted}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="font-medium mr-2">{option.id})</span>
-                            {option.text}
+                      return (
+                        <button
+                          key={option.id}
+                          className={optionClass}
+                          onClick={() => handleOptionSelect(option.id)}
+                          disabled={isSubmitted}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="font-medium mr-2">{option.id})</span>
+                              {option.text}
+                            </div>
+                            {isSubmitted && isCorrect && (
+                              <CheckCircle size={20} className="text-green-600 flex-shrink-0" />
+                            )}
+                            {isSubmitted && !isCorrect && isSelected && (
+                              <XCircle size={20} className="text-red-600 flex-shrink-0" />
+                            )}
                           </div>
-                          {isSubmitted && isCorrect && (
-                            <CheckCircle size={20} className="text-green-600 flex-shrink-0" />
-                          )}
-                          {isSubmitted && !isCorrect && isSelected && (
-                            <XCircle size={20} className="text-red-600 flex-shrink-0" />
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Footer navigation */}
-            <div className="border-t bg-white p-3 flex justify-between">
-              <button className="flex items-center gap-1 text-gray-700 hover:text-gray-900" onClick={navigateToCourse}>
-                <LogOut size={16} />
-                <span>Exit Quiz</span>
-              </button>
-              <button
-                className={cn(
-                  "flex items-center gap-1 px-4 py-2 rounded-md",
-                  selectedAnswers[currentQuestionId] && !submittedAnswers[currentQuestionId]
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : submittedAnswers[currentQuestionId]
-                      ? "bg-green-500 text-white hover:bg-green-600"
-                      : "bg-gray-300 text-gray-600 cursor-not-allowed",
-                )}
-                onClick={navigateToNextQuestion}
-                disabled={!selectedAnswers[currentQuestionId] && !submittedAnswers[currentQuestionId]}
-              >
-                <span>
-                  {isCurrentQuestionAnswered
-                    ? currentQuestionId === quizData.totalQuestions
-                      ? "Finish Quiz"
-                      : "Next"
-                    : "Submit"}
-                </span>
-                <ArrowRight size={16} />
-              </button>
+              {/* Footer navigation */}
+              <div className="border-t bg-white p-3 flex justify-between">
+                <button className="flex items-center gap-1 text-gray-700 hover:text-gray-900" onClick={navigateToCourse}>
+                  <LogOut size={16} />
+                  <span>Exit Quiz</span>
+                </button>
+                <button
+                  className={cn(
+                    "flex items-center gap-1 px-4 py-2 rounded-md",
+                    selectedAnswers[currentQuestionId] && !submittedAnswers[currentQuestionId]
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : submittedAnswers[currentQuestionId]
+                        ? "bg-green-500 text-white hover:bg-green-600"
+                        : "bg-gray-300 text-gray-600 cursor-not-allowed",
+                  )}
+                  onClick={navigateToNextQuestion}
+                  disabled={!selectedAnswers[currentQuestionId] && !submittedAnswers[currentQuestionId]}
+                >
+                  <span>
+                    {isCurrentQuestionAnswered
+                      ? currentQuestionId === quizData.totalQuestions
+                        ? "Finish Quiz"
+                        : "Next"
+                      : "Submit"}
+                  </span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
